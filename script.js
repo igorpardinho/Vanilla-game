@@ -141,7 +141,7 @@ window.addEventListener('load', function () {
             this.fps = 20;
             this.frameTimer = 0;
             this.frameInterval = 1000 / this.fps;
-            this.speed = 8;
+            this.speed = 15;
             this.markedForDeletion = false;
         }
         draw(context) {
@@ -167,7 +167,7 @@ window.addEventListener('load', function () {
     function handleEnemies(deltaTime) {
         if (enemyTimer > enemyInterval + randomEnemyInterval) {
             enemies.push(new Enemy(canvas.width, canvas.height));
-            randomEnemyInterval = Math.random() * 1000 + 500;
+            randomEnemyInterval = Math.random() * 100 + 500;
             enemyTimer = 0;
         } else {
             enemyTimer += deltaTime;
@@ -203,7 +203,7 @@ window.addEventListener('load', function () {
 
     let lastTime = 0;
     let enemyTimer = 0;
-    let enemyInterval = 2000;
+    let enemyInterval = 1000;
     let randomEnemyInterval = Math.random() * 1000 + 500;
 
     function animate(timeStamp) {
