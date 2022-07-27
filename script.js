@@ -10,6 +10,8 @@ window.addEventListener('load', function () {
     class InputHandler {
         constructor() {
             this.keys = [];
+            this.touchY = '';
+            this.touchTreshold = 30;
             window.addEventListener('keydown', e => {
                 if ((
                     e.key === 'ArrowDown' ||
@@ -18,7 +20,7 @@ window.addEventListener('load', function () {
                     e.key === 'ArrowRight')
                     && this.keys.indexOf(e.key) === -1) {
                     this.keys.push(e.key);
-                }
+                } else if (e.key === 'Enter' && gameOver) restartGame();
             });
             window.addEventListener('keyup', e => {
                 if (
@@ -29,6 +31,28 @@ window.addEventListener('load', function () {
                     this.keys.splice(this.keys.indexOf(e.key), 1);
                 }
             });
+            window.addEventListener('touchstart', e => {
+                this.touchY = e.changedTouches[0].pageY
+            });
+            window.addEventListener('touchmove', e => {
+                const swipeDistance = e.changedTouches[0].pageY - this.touchY;
+                if (swipeDistance < -this.touchTreshold && this.keys.indexOf('swipe up')
+                 === -1) this.keys.push('swipe up');
+                else if (swipeDistance > this.touchTreshold && this.keys.indexOf('swipe down')
+                 === -1) {
+                    this.keys.push('swipe down');
+                    if (gameOver) restartGame();
+                   
+                    
+                 }
+            });
+            window.addEventListener('touchend', e => {
+                  this.keys.splice(this.keys.indexOf('swipe up'), 1);
+                  this.keys.splice(this.keys.indexOf('swipe down'), 1);
+
+            })
+
+
         }
     }
 
@@ -38,7 +62,7 @@ window.addEventListener('load', function () {
             this.gameHeight = gameHeight;
             this.width = 200;
             this.height = 200;
-            this.x = 10;
+            this.x = 100;
             this.y = this.gameHeight - this.height;
             this.image = document.getElementById("playerImage");
             this.frameX = 0;
@@ -50,6 +74,12 @@ window.addEventListener('load', function () {
             this.speed = 0;
             this.vy = 0;
             this.weight = 1;
+        }
+        restart() {
+            this.x = 100;
+            this.y = this.gameHeight - this.height;
+            this.maxFrame = 8;
+            this.frameY = 0;
         }
         draw(context) {
 
@@ -78,7 +108,7 @@ window.addEventListener('load', function () {
             } else if (input.keys.indexOf('ArrowLeft') > -1) {
                 this.speed = -5;
             }
-            else if (input.keys.indexOf('ArrowUp') > -1 && this.onGround()) {
+            else if ((input.keys.indexOf('ArrowUp') > -1 || input.keys.indexOf('swipe up') > -1 ) && this.onGround()) {
                 this.vy -= 28;
             } else {
                 this.speed = 0;
@@ -124,6 +154,9 @@ window.addEventListener('load', function () {
         update() {
             this.x -= this.speed;
             if (this.x < 0 - this.width) this.x = 0;
+        }
+        restart() {
+            this.x = 0;
         }
     }
 
@@ -182,6 +215,7 @@ window.addEventListener('load', function () {
     }
 
     function displayStatusText(context) {
+        context.textAlign = 'left';
         context.font = '40px Helvetica';
         context.fillStyle = 'black';
         context.fillText('Score: ' + score, 20, 50);
@@ -190,11 +224,20 @@ window.addEventListener('load', function () {
         if (gameOver) {
             context.textAlign = 'center';
             context.fillStyle = 'black';
-            context.fillText('GAME OVER, Try Again!', canvas.width / 2, 200);
+            context.fillText('GAME OVER, press Enter or swipe down to restart!', canvas.width / 2, 200);
             context.fillStyle = 'white';
-            context.fillText('GAME OVER, Try Again!', canvas.width / 2 + 2, 202);
+            context.fillText('GAME OVER, press Enter or swipe down to restart!', canvas.width / 2 + 2, 202);
 
         }
+    }
+
+    function restartGame() {
+        player.restart();
+        background.restart();
+        enemies = [];
+        score = 0;
+        gameOver = false;
+        animate(0);
     }
 
     const input = new InputHandler();
